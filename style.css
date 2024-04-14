@@ -1,0 +1,6 @@
+#gameCanvas {
+    border: 1px solid #ddd;
+    width: 400px;
+    height: 300px;
+    background-color: #eee;
+}
