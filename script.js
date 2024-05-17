@@ -1,20 +1,28 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
+const startButton = document.getElementById('startButton');
 
-const gridSize = 20; // Size of snake and food blocks
-let snake = [{ x: 10, y: 10 }]; 
-let food = {}; 
-let dx = 1; // Initial horizontal movement 
-let dy = 0; // No initial vertical movement
+const gridSize = 20;
+let snake = [{ x: 10, y: 10 }];
+let food = {};
+let dx = 1;
+let dy = 0;
 let score = 0;
-let gameLoop; 
+let gameSpeed = 100;
+let gameLoop;
+let isGameOver = false;  
 
 function generateFood() {
+  // Ensure food doesn't spawn on the snake
+  let validPosition = false;
+  while (!validPosition) {
     food = {
-        x: Math.floor(Math.random() * (canvas.width / gridSize)),
-        y: Math.floor(Math.random() * (canvas.height / gridSize))
-    }
+      x: Math.floor(Math.random() * (canvas.width / gridSize)),
+      y: Math.floor(Math.random() * (canvas.height / gridSize))
+    };
+    validPosition = snake.every(segment => segment.x !== food.x || segment.y !== food.y);
+  }
 }
 
 function draw() {
@@ -66,6 +74,19 @@ function checkCollisions() {
     }
 }
 
+function startGame() {
+  snake = [{ x: 10, y: 10 }];
+  dx = 1; dy = 0;
+  score = 0;
+  scoreDisplay.textContent = score;
+  isGameOver = false;
+  generateFood();
+  gameLoop = setInterval(function() {
+    draw();
+    update();
+  }, gameSpeed);
+}
+
 function gameOver() {
     clearInterval(gameLoop);
     alert("Game Over! Your score was " + score);
@@ -89,10 +110,23 @@ function changeDirection(event) {
     if (event.keyCode === DOWN_KEY && !goingUp) { dx = 0; dy = 1; }
 }
 
-document.addEventListener('keydown', changeDirection);
+function increaseSpeed() {
+  if (gameSpeed > 50) { // Limit maximum speed
+    gameSpeed -= 5;
+    clearInterval(gameLoop);
+    gameLoop = setInterval(function() {
+      draw();
+      update();
+    }, gameSpeed);
+  }
+}
 
 generateFood();
 gameLoop = setInterval(function() {
     draw();
     update();
 }, 100); // Update every 100 ms
+
+document.addEventListener('keydown', changeDirection);
+startButton.addEventListener('click', startGame);
+document.addEventListener('keydown', changeDirection);
